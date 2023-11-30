@@ -3,6 +3,7 @@ const router = express.Router();
 const { hashPassword, comparePassword } = require("../util/helpers");
 const { Op } = require("sequelize");
 const { Users } = require("../models");
+const passport = require("../config/passport");
 
 router.post("/register", async (req, res) => {
 	let { Username, Email, Password, FirstName, LastName } = req.body;
@@ -39,8 +40,13 @@ router.post("/register", async (req, res) => {
 	}
 });
 
-router.post("/login", (req, res) => {
-	res.send("Login route");
-});
+router.post(
+	"/login",
+	passport.authenticate("local", {
+		successRedirect: "/dashboard",
+		failureRedirect: "/login",
+		failureFlash: true,
+	})
+);
 
 module.exports = router;
