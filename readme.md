@@ -1,25 +1,50 @@
-# Register Route
+# API Documentation
 
-## Description
+## Register User
 
-This route handles the registration of a new user. It expects a POST request with the following parameters in the request body:
+**Endpoint**: `POST /register`
 
-- `Username`: User's username
-- `Email`: User's email address
-- `Password`: User's password
-- `FirstName`: User's first name
-- `LastName`: User's last name
+**Description**: This endpoint is used to register a new user.
 
-The route performs the following steps:
+**Request Body**:
 
-1. Force email and username to lowercase.
-2. Check if the provided username or email already exists in the database.
-3. If the username or email is already taken, it returns a 400 Bad Request response with a message indicating that the username or email is already in use.
-4. If the username and email are unique, it creates a new user in the database with the provided information.
-5. Returns a 201 Created response with a message indicating successful user creation and the user object.
+| Field     | Type   | Description                   |
+|-----------|--------|-------------------------------|
+| Username  | String | The username of the new user. |
+| Email     | String | The email of the new user.    |
+| Password  | String | The password of the new user. |
+| FirstName | String | The first name of the new user. |
+| LastName  | String | The last name of the new user. |
 
-## Usage
+**Responses**:
 
-```http
-POST /register
+- **201 Created**: If the user is successfully created. The response body will contain a message and the created user's details.
+
+```json
+{
+  "message": "User created",
+  "user": {
+    "Username": "johndoe",
+    "Email": "johndoe@example.com",
+    "FirstName": "John",
+    "LastName": "Doe"
+    // Other user fields...
+  }
+}
+```
+
+- **400 Bad Request**: If the username or email is already taken. The response body will contain a message.
+
+```json
+{
+  "message": "Username or email already taken"
+}
+```
+
+- **500 Internal Server Error**: If there's an error on the server. The response body will contain a message.
+
+```json
+{
+  "message": "Internal Server Error"
+}
 ```
