@@ -1,8 +1,9 @@
 # API Documentation
 
-## Register User
+## Auth
+### Register User
 
-**Endpoint**: `POST /register`
+**Endpoint**: `POST /api/v1/auth/register`
 
 **Description**: This endpoint is used to register a new user.
 
@@ -15,6 +16,18 @@
 | Password  | String | The password of the new user. |
 | FirstName | String | The first name of the new user. |
 | LastName  | String | The last name of the new user. |
+
+**Example Request**:
+
+```json
+{
+    "Username": "johndoe",
+    "Email": "johndoe@example.com",
+    "Password": "password123",
+    "FirstName": "John",
+    "LastName": "Doe"
+}
+```
 
 **Responses**:
 
