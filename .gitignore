@@ -10,7 +10,6 @@ yarn-error.log*
 
 # Ignore environment-specific files
 .env
-.env.*
 .env.local
 .env.development.local
 .env.test.local
