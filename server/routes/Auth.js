@@ -6,31 +6,30 @@ const { Users } = require("../models");
 const passport = require("../config/passport");
 
 router.post("/register", async (req, res) => {
-	let { Username, Email, Password, FirstName, LastName } = req.body;
+	console.log(req.body);
+	let { email, password, firstName, lastName } = req.body;
 
 	try {
-		// Force email and username to lowercase
-		Username = Username.toLowerCase();
-		Email = Email.toLowerCase();
+		// Force email to lowercase
+		email = email.toLowerCase();
 
-		// Check if username or email already exists
+		// Check if email already exists
 		const existingUser = await Users.findOne({
 			where: {
-				[Op.or]: [{ Username: Username }, { Email: Email }],
+				[Op.or]: [{ Email: email }],
 			},
 		});
 
 		if (existingUser) {
-			return res.status(400).json({ message: "Username or email already taken" });
+			return res.status(400).json({ message: "Email is already in use" });
 		}
 
 		// Create new user
 		const newUser = await Users.create({
-			Username,
-			Email,
-			Password: hashPassword(Password),
-			FirstName,
-			LastName,
+			Email: email,
+			Password: hashPassword(password),
+			FirstName: firstName,
+			LastName: lastName,
 		});
 
 		return res.status(201).json({ message: "User created", user: newUser });

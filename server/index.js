@@ -3,6 +3,7 @@ const app = express();
 const session = require("express-session");
 const passport = require("./config/passport");
 require("dotenv").config();
+const cors = require("cors");
 const config = require("./config/config");
 
 // Route imports
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cors());
 
 // Routes
 app.use("/api/v1/auth", authRouter);
