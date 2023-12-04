@@ -39,13 +39,35 @@ router.post("/register", async (req, res) => {
 	}
 });
 
-router.post(
-	"/login",
-	passport.authenticate("local", {
-		successRedirect: "/dashboard",
-		failureRedirect: "/login",
-		failureFlash: true,
-	})
-);
+router.post("/login", function (req, res, next) {
+	passport.authenticate("local", function (err, user, info) {
+		if (err) {
+			console.error(err);
+			return next(err);
+		}
+		if (!user) {
+			return res.status(401).json({ message: "Authentication failed", info: info });
+		}
+		req.logIn(user, function (err) {
+			if (err) {
+				return next(err);
+			}
+			return res.status(200).json({ message: "Logged in" });
+		});
+	})(req, res, next);
+});
+
+router.get("/isAuthenticated", (req, res) => {
+	try {
+		if (req.user) {
+			return res.status(200).json({ message: "Authenticated", access: req.user.Access });
+		} else {
+			return res.status(401).json({ message: "Not Authenticated" });
+		}
+	} catch (error) {
+		console.error("Error checking authentication:", error);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+});
 
 module.exports = router;

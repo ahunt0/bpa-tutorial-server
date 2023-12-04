@@ -22,6 +22,12 @@ app.use(cors());
 // Routes
 app.use("/api/v1/auth", authRouter);
 
+// Error handler
+app.use((err, req, res, next) => {
+	console.log(err);
+	res.status(500).json({ message: "Internal Server Error" });
+});
+
 db.sequelize.sync().then(() => {
 	app.listen(3001, () => {
 		console.log("Server running: http://localhost:3001");
