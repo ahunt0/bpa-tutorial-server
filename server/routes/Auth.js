@@ -13,6 +13,29 @@ router.post("/register", async (req, res) => {
 		// Force email to lowercase
 		email = email.toLowerCase();
 
+		// Validations
+		if (!email) {
+			return res.status(400).json({ message: "Email is required" });
+		}
+
+		if (!password) {
+			return res.status(400).json({ message: "Password is required" });
+		}
+
+		if (!firstName) {
+			return res.status(400).json({ message: "First name is required" });
+		}
+
+		if (!lastName) {
+			return res.status(400).json({ message: "Last name is required" });
+		}
+
+		// Check email based on regex
+		const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+		if (!emailRegex.test(email)) {
+			return res.status(400).json({ message: "Email is invalid" });
+		}
+
 		// Check if email already exists
 		const existingUser = await Users.findOne({
 			where: {
@@ -40,13 +63,22 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", function (req, res, next) {
+	// Validate email and password
+	if (!req.body.email) {
+		return res.status(400).json({ message: "Email is required" });
+	}
+
+	if (!req.body.password) {
+		return res.status(400).json({ message: "Password is required" });
+	}
+
 	passport.authenticate("local", function (err, user, info) {
 		if (err) {
 			console.error(err);
 			return next(err);
 		}
 		if (!user) {
-			return res.status(401).json({ message: "Authentication failed", info: info });
+			return res.status(401).json({ message: "Incorrect email or password", info: info });
 		}
 		req.logIn(user, function (err) {
 			if (err) {
@@ -60,9 +92,9 @@ router.post("/login", function (req, res, next) {
 router.get("/isAuthenticated", (req, res) => {
 	try {
 		if (req.user) {
-			return res.status(200).json({ message: "Authenticated", access: req.user.Access });
+			return res.status(200).json({ auth: true, access: req.user.Access });
 		} else {
-			return res.status(401).json({ message: "Not Authenticated" });
+			return res.status(401).json({ auth: false });
 		}
 	} catch (error) {
 		console.error("Error checking authentication:", error);
