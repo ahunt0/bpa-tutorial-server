@@ -8,6 +8,7 @@ const config = require("./config/config");
 
 // Route imports
 const authRouter = require("./routes/Auth");
+const adminRouter = require("./routes/Admin");
 
 const db = require("./models");
 
@@ -21,6 +22,7 @@ app.use(cors());
 
 // Routes
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/admin", adminRouter);
 
 // Error handler
 app.use((err, req, res, next) => {
