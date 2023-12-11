@@ -46,4 +46,23 @@ router.get("/users/today", async (req, res) => {
 	}
 });
 
+router.get("/users/find/:name", async (req, res) => {
+	try {
+		const users = await Users.findAll({
+			where: {
+				[Op.or]: [{ FirstName: { [Op.like]: `%${req.params.name}%` } }, { LastName: { [Op.like]: `%${req.params.name}%` } }, { Email: { [Op.like]: `%${req.params.name}%` } }],
+			},
+			attributes: ["UserID", "FirstName", "LastName", "Email", "Access", "RegistrationDate"],
+		});
+
+		if (users.length === 0) {
+			return res.status(404).json({ error: "No users found" });
+		}
+
+		return res.status(200).json({ users });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Server error" });
+	}
+});
 module.exports = router;
