@@ -48,9 +48,22 @@ router.get("/users/today", async (req, res) => {
 
 router.get("/users/find/:name", async (req, res) => {
 	try {
-		const users = await Users.findAll({
+		let users;
+		const { name } = req.params;
+		const role = req.query.role || ""; // Get role from query parameters or set it as an empty string if not provided
+
+		// Define role conditions based on the provided role parameter
+		const roleConditions = role === "student" ? { Access: "student" } : role === "teacher" ? { Access: "teacher" } : role === "admin" ? { Access: "admin" } : {}; // Default: no role filter
+
+		// Construct the query with additional role conditions
+		users = await Users.findAll({
 			where: {
-				[Op.or]: [{ FirstName: { [Op.like]: `%${req.params.name}%` } }, { LastName: { [Op.like]: `%${req.params.name}%` } }, { Email: { [Op.like]: `%${req.params.name}%` } }],
+				[Op.and]: [
+					{
+						[Op.or]: [{ FirstName: { [Op.like]: `%${name}%` } }, { LastName: { [Op.like]: `%${name}%` } }, { Email: { [Op.like]: `%${name}%` } }],
+					},
+					roleConditions, // Apply role-specific conditions
+				],
 			},
 			attributes: ["UserID", "FirstName", "LastName", "Email", "Access", "RegistrationDate"],
 		});
@@ -65,4 +78,5 @@ router.get("/users/find/:name", async (req, res) => {
 		return res.status(500).json({ message: "Server error" });
 	}
 });
+
 module.exports = router;
