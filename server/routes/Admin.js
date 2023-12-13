@@ -46,22 +46,27 @@ router.get("/users/today", async (req, res) => {
 	}
 });
 
-router.get("/users/find/:name", async (req, res) => {
+router.get("/users/find/:name?", async (req, res) => {
 	try {
 		let users;
 		const { name } = req.params;
-		const role = req.query.role || ""; // Get role from query parameters or set it as an empty string if not provided
+		const role = req.query.role || "";
 
 		// Define role conditions based on the provided role parameter
-		const roleConditions = role === "student" ? { Access: "student" } : role === "teacher" ? { Access: "teacher" } : role === "admin" ? { Access: "admin" } : {}; // Default: no role filter
+		const roleConditions = role === "student" ? { Access: "student" } : role === "teacher" ? { Access: "teacher" } : role === "admin" ? { Access: "admin" } : {};
 
-		// Construct the query with additional role conditions
+		// Check if name exists to include it in the query
+		const nameConditions = name
+			? {
+					[Op.or]: [{ FirstName: { [Op.like]: `%${name}%` } }, { LastName: { [Op.like]: `%${name}%` } }, { Email: { [Op.like]: `%${name}%` } }],
+			  }
+			: {};
+
+		// Construct the query with additional role and name conditions
 		users = await Users.findAll({
 			where: {
 				[Op.and]: [
-					{
-						[Op.or]: [{ FirstName: { [Op.like]: `%${name}%` } }, { LastName: { [Op.like]: `%${name}%` } }, { Email: { [Op.like]: `%${name}%` } }],
-					},
+					nameConditions, // Apply name-specific conditions if name exists
 					roleConditions, // Apply role-specific conditions
 				],
 			},
