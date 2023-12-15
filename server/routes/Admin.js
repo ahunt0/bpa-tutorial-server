@@ -14,15 +14,18 @@ router.get("/users", async (req, res) => {
 	}
 });
 
-// router.get("/users/:id", async (req, res) => {
-// 	try {
-// 		const user = await Users.findOne({ where: { UserID: req.params.id }, attributes: ["UserID", "FirstName", "LastName", "Email", "Access", "RegistrationDate"] });
-// 		return res.status(200).json({ user });
-// 	} catch (error) {
-// 		console.error(error);
-// 		return res.status(500).json({ message: "Internal server error" });
-// 	}
-// });
+router.get("/user/:id", async (req, res) => {
+	try {
+		const user = await Users.findOne({ where: { UserID: req.params.id }, attributes: ["UserID", "FirstName", "LastName", "Email", "Access", "RegistrationDate"] });
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+		return res.status(200).json({ user });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal server error" });
+	}
+});
 
 router.get("/users/total", async (req, res) => {
 	try {
