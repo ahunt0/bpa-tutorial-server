@@ -87,4 +87,50 @@ router.get("/users/find/:name?", async (req, res) => {
 	}
 });
 
+router.put("/user/edit/:id", async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { FirstName, LastName, Email, Access } = req.body;
+
+		// Check if the user exists
+		const user = await Users.findOne({ where: { UserID: id } });
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+
+		// Update the user details
+		await Users.update(
+			{ FirstName, LastName, Email, Access },
+			{
+				where: { UserID: id },
+			}
+		);
+
+		return res.status(200).json({ message: "User updated successfully" });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal server error" });
+	}
+});
+
+router.delete("/user/delete/:id", async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		// Check if the user exists
+		const user = await Users.findOne({ where: { UserID: id } });
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+
+		// Delete the user
+		await Users.destroy({ where: { UserID: id } });
+
+		return res.status(200).json({ message: "User deleted successfully" });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal server error" });
+	}
+});
+
 module.exports = router;
