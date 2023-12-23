@@ -33,7 +33,7 @@ router.post("/register", async (req, res) => {
 		// Check email based on regex
 		const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 		if (!emailRegex.test(email)) {
-			return res.status(400).json({ message: "Email is invalid" });
+			return res.status(400).json({ success: false, message: "Email is invalid" });
 		}
 
 		// Check if email already exists
@@ -44,7 +44,7 @@ router.post("/register", async (req, res) => {
 		});
 
 		if (existingUser) {
-			return res.status(400).json({ message: "Email is already in use" });
+			return res.status(400).json({ success: false, message: "Email is already in use" });
 		}
 
 		// Create new user
@@ -55,7 +55,7 @@ router.post("/register", async (req, res) => {
 			LastName: lastName,
 		});
 
-		return res.status(201).json({ message: "User created", user: newUser });
+		return res.status(201).json({ success: true, message: "User created", user: newUser });
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ message: "Internal Server Error" });
@@ -65,11 +65,11 @@ router.post("/register", async (req, res) => {
 router.post("/login", function (req, res, next) {
 	// Validate email and password
 	if (!req.body.email) {
-		return res.status(400).json({ message: "Email is required" });
+		return res.status(400).json({ success: false, message: "Email is required" });
 	}
 
 	if (!req.body.password) {
-		return res.status(400).json({ message: "Password is required" });
+		return res.status(400).json({ success: false, message: "Password is required" });
 	}
 
 	passport.authenticate("local", function (err, user, info) {
@@ -78,13 +78,13 @@ router.post("/login", function (req, res, next) {
 			return next(err);
 		}
 		if (!user) {
-			return res.status(401).json({ message: "Incorrect email or password", info: info });
+			return res.status(401).json({ success: false, message: "Incorrect email or password", info: info });
 		}
 		req.logIn(user, function (err) {
 			if (err) {
 				return next(err);
 			}
-			return res.status(200).json({ message: "Logged in" });
+			return res.status(200).json({ success: true, message: "Logged in" });
 		});
 	})(req, res, next);
 });
