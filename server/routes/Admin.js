@@ -297,10 +297,10 @@ router.get("/assignments/:courseId", async (req, res) => {
 	// Find all assignments for the provided course ID and search for the course name if it exists
 	const assignments = await Assignments.findAll({
 		where: { CourseID: req.params.courseId },
-		attributes: ["AssignmentID", "AssignmentName", "AssignmentGrade", "Deadline", "Description", "TeacherID", "Content", "ContentType"],
+		attributes: ["AssignmentID", "AssignmentName", "AssignmentGrade", "Deadline", "Description", "Content", "ContentType"],
 		include: [
 			{ model: Courses, as: "Course", attributes: ["CourseId", "CourseName"] },
-			{ model: Users, as: "Teacher", attributes: ["UserID", "FirstName", "LastName"] },
+			{ model: Users, as: "Teacher", attributes: ["UserID", "FirstName", "LastName", "Email"] },
 		],
 	});
 
@@ -315,10 +315,10 @@ router.get("/assignment/:id", async (req, res) => {
 	try {
 		const assignment = await Assignments.findOne({
 			where: { AssignmentID: req.params.id },
-			attributes: ["AssignmentID", "AssignmentName", "AssignmentGrade", "Deadline", "Description", "TeacherID", "Content", "ContentType"],
+			attributes: ["AssignmentID", "AssignmentName", "AssignmentGrade", "Deadline", "Description", "Content", "ContentType"],
 			include: [
 				{ model: Courses, as: "Course", attributes: ["CourseId", "CourseName"] },
-				{ model: Users, as: "Teacher", attributes: ["UserID", "FirstName", "LastName"] },
+				{ model: Users, as: "Teacher", attributes: ["UserID", "FirstName", "LastName", "Email"] },
 			],
 		});
 		if (!assignment) {
@@ -346,10 +346,10 @@ router.get("/assignments/find/:name?", async (req, res) => {
 					assignmentNameConditions, // Apply name-specific conditions if name exists
 				],
 			},
-			attributes: ["AssignmentID", "AssignmentName", "AssignmentGrade", "Deadline", "Description", "TeacherID", "Content"],
+			attributes: ["AssignmentID", "AssignmentName", "AssignmentGrade", "Deadline", "Description", "Content", "ContentType"],
 			include: [
 				{ model: Courses, as: "Course", attributes: ["CourseId", "CourseName"] },
-				{ model: Users, as: "Teacher", attributes: ["UserID", "FirstName", "LastName"] },
+				{ model: Users, as: "Teacher", attributes: ["UserID", "FirstName", "LastName", "Email"] },
 			],
 		});
 
