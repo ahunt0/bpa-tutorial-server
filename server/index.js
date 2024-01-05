@@ -9,12 +9,14 @@ const config = require("./config/config");
 // Route imports
 const authRouter = require("./routes/Auth");
 const adminRouter = require("./routes/Admin");
+const commonRouter = require("./routes/Common");
 
 const db = require("./models");
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const { ensureAuthenticated, ensureAdmin } = require("./middleware/ensureAuth");
 
 // Configure CORS options
 const corsOptions = {
@@ -33,6 +35,7 @@ app.use(
 			secure: false, // Set to true if using HTTPS
 			maxAge: 3600000, // Set the cookie expiration time
 			httpOnly: true,
+			sameSite: "lax",
 		},
 		credentials: true, // Enable credentials in cross-origin requests
 	})
@@ -43,7 +46,8 @@ app.use(passport.session());
 
 // Routes
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/admin", ensureAuthenticated, ensureAdmin, adminRouter); // Protected with auth/admin middleware
+app.use("/api/v1/", ensureAuthenticated, commonRouter);
 
 // Error handler
 app.use((err, req, res, next) => {
