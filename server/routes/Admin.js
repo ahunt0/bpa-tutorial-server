@@ -209,7 +209,7 @@ router.post("/courses/create", async (req, res) => {
 		// Check if the course exists
 		const course = await Courses.findOne({ where: { CourseName: CourseName } });
 		if (course) {
-			return res.status(404).json({ success: false, error: "Course already exists" });
+			return res.status(404).json({ success: false, error: "Course already exists", code: 1 });
 		}
 
 		// Create a new course
@@ -222,7 +222,7 @@ router.post("/courses/create", async (req, res) => {
 			});
 		} catch (error) {
 			if (error.name === "SequelizeUniqueConstraintError") {
-				return res.status(400).json({ success: false, error: { message: "Teacher already has a course", code: 1 } });
+				return res.status(400).json({ success: false, error: "Teacher already has a course", code: 2 });
 			}
 			throw error;
 		}
@@ -373,7 +373,7 @@ router.post("/assignments/create", async (req, res) => {
 		// Check if the assignment exists
 		const assignment = await Assignments.findOne({ where: { AssignmentName: AssignmentName } });
 		if (assignment) {
-			return res.status(404).json({ success: false, error: "Assignment already exists" });
+			return res.status(404).json({ success: false, error: "Assignment already exists", code: 1 });
 		}
 
 		const course = await Courses.findOne({ where: { CourseID: CourseId } });
@@ -401,6 +401,60 @@ router.post("/assignments/create", async (req, res) => {
 		}
 
 		return res.status(200).json({ success: true, message: "Assignment created successfully" });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ success: false, message: "Server error" });
+	}
+});
+
+// Edit an assignment
+
+router.put("/assignment/edit/:id", async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { AssignmentName, AssignmentGrade, Deadline, Description, Content, ContentType } = req.body;
+
+		// Check if the assignment exists
+		const assignment = await Assignments.findOne({ where: { AssignmentID: id } });
+		if (!assignment) {
+			return res.status(404).json({ success: false, error: "Assignment not found" });
+		}
+
+		// Update the assignment details
+		try {
+			await Assignments.update(
+				{ AssignmentName, AssignmentGrade, Deadline, Description, Content, ContentType },
+				{
+					where: { AssignmentID: id },
+				}
+			);
+		} catch (error) {
+			throw error;
+		}
+
+		return res.status(200).json({ success: true, message: "Assignment updated successfully" });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ success: false, message: "Server error" });
+	}
+});
+
+// Delete an assignment
+
+router.delete("/assignment/delete/:id", async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		// Check if the assignment exists
+		const assignment = await Assignments.findOne({ where: { AssignmentID: id } });
+		if (!assignment) {
+			return res.status(404).json({ error: "Assignment not found" });
+		}
+
+		// Delete the assignment
+		await Assignments.destroy({ where: { AssignmentID: id } });
+
+		return res.status(200).json({ success: true, message: "Assignment deleted successfully" });
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ success: false, message: "Server error" });
