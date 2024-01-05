@@ -368,13 +368,21 @@ router.get("/assignments/find/:name?", async (req, res) => {
 
 router.post("/assignments/create", async (req, res) => {
 	try {
-		const { CourseId, AssignmentName, AssignmentGrade, Deadline, Description, TeacherID, Content, ContentType } = req.body;
+		const { CourseId, AssignmentName, AssignmentGrade, Deadline, Description, Content, ContentType } = req.body;
 
 		// Check if the assignment exists
 		const assignment = await Assignments.findOne({ where: { AssignmentName: AssignmentName } });
 		if (assignment) {
 			return res.status(404).json({ success: false, error: "Assignment already exists" });
 		}
+
+		const course = await Courses.findOne({ where: { CourseID: CourseId } });
+
+		if (!course) {
+			return res.status(404).json({ success: false, error: "Course not found" });
+		}
+
+		const { UserId: TeacherID } = course;
 
 		// Create a new assignment
 		try {
