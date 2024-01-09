@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Users, Courses, Assignments } = require("../models");
+const { Users, Courses, Assignments, Students } = require("../models");
 const { Op } = require("sequelize");
 const moment = require("moment");
 
@@ -130,6 +130,32 @@ router.delete("/user/delete/:id", async (req, res) => {
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ success: false, message: "Internal server error" });
+	}
+});
+
+router.get("/users/unassigned", async (req, res) => {
+	try {
+		const students = await Users.findAll({
+			where: { Access: "student" },
+			attributes: ["UserID", "FirstName", "LastName", "Email", "Access", "RegistrationDate"],
+		});
+
+		// Check if the students UserID exists in the Students table asynchronously
+		const unassignedStudents = await Promise.all(
+			students.map(async (student) => {
+				const { UserID } = student;
+				const studentExists = await Students.findOne({ where: { UserID } });
+				return studentExists ? null : student; // Return null for assigned students
+			})
+		);
+
+		// Filter out the assigned students (remove null values)
+		const filteredUnassignedStudents = unassignedStudents.filter((student) => student !== null);
+
+		return res.status(200).json({ success: true, unassignedStudents: filteredUnassignedStudents });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ success: false, message: "Server error" });
 	}
 });
 
