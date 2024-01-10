@@ -16,11 +16,25 @@ router.get("/users", async (req, res) => {
 
 router.get("/user/:id", async (req, res) => {
 	try {
-		const user = await Users.findOne({ where: { UserID: req.params.id }, attributes: ["UserID", "FirstName", "LastName", "Email", "Access", "RegistrationDate"] });
+		const user = await Users.findOne({
+			where: { UserID: req.params.id },
+			attributes: ["UserID", "FirstName", "LastName", "Email", "Access", "RegistrationDate"],
+		});
 		if (!user) {
 			return res.status(404).json({ success: false, error: "User not found" });
 		}
-		return res.status(200).json({ success: true, user });
+
+		const student = await Students.findOne({ where: { UserID: user.UserID } });
+		const isStudent = !!student;
+
+		const GradeLevel = isStudent ? student.GradeLevel : null;
+
+		const userWithGradeLevel = {
+			...user.toJSON(),
+			GradeLevel,
+		};
+
+		return res.status(200).json({ success: true, user: userWithGradeLevel });
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ success: false, message: "Internal server error" });
@@ -90,12 +104,23 @@ router.get("/users/find/:name?", async (req, res) => {
 router.put("/user/edit/:id", async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { FirstName, LastName, Email, Access } = req.body;
+		const { FirstName, LastName, Email, Access, GradeLevel } = req.body;
 
 		// Check if the user exists
 		const user = await Users.findOne({ where: { UserID: id } });
 		if (!user) {
 			return res.status(404).json({ success: false, error: "User not found" });
+		}
+
+		// Check if the user is a student
+		const student = await Students.findOne({ where: { UserID: id } });
+		const isStudent = !!student;
+
+		// If the user is a student, update the grade level
+		if (isStudent) {
+			await Students.update({ GradeLevel }, { where: { UserID: id } });
+		} else {
+			await Students.create({ UserID: id, GradeLevel });
 		}
 
 		// Update the user details
@@ -106,7 +131,7 @@ router.put("/user/edit/:id", async (req, res) => {
 			}
 		);
 
-		return res.status(200).json({ success: true, message: "User updated successfully" });
+		return res.status(200).json({ success: true, message: "User updated successfully", isStudent });
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ success: false, message: "Internal server error" });
